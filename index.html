@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hiroki Yamashita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Sans+JP:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0a0a08;
+    --off-white: #f5f2ed;
+    --warm-gray: #9a9590;
+    --accent: #c8a96e;
+    --accent-dim: rgba(200, 169, 110, 0.15);
+    --border: rgba(154, 149, 144, 0.2);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--off-white);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(200, 169, 110, 0.4);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), width 0.3s, height 0.3s, border-color 0.3s;
+    transform: translate(-50%, -50%);
+  }
+  a:hover ~ .cursor-ring, button:hover ~ .cursor-ring { width: 56px; height: 56px; }
+
+  /* Nav */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 28px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    mix-blend-mode: normal;
+  }
+  nav::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(10,10,8,0.9) 0%, transparent 100%);
+    pointer-events: none;
+  }
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--warm-gray);
+    text-decoration: none;
+    position: relative;
+  }
+  .nav-links {
+    display: flex; gap: 40px; list-style: none; position: relative;
+  }
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--warm-gray);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 48px 80px 48px;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 1s 0.2s forwards;
+  }
+  .hero-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(52px, 6vw, 88px);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 1s 0.4s forwards;
+  }
+  .hero-name em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-desc {
+    font-size: 13px;
+    line-height: 2;
+    color: var(--warm-gray);
+    max-width: 380px;
+    border-left: 1px solid var(--accent);
+    padding-left: 20px;
+    opacity: 0;
+    animation: fadeUp 1s 0.6s forwards;
+  }
+
+  .hero-right {
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-image {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+    filter: grayscale(20%);
+    animation: scaleIn 1.4s 0s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    transform: scale(1.08);
+    opacity: 0;
+  }
+  .hero-image-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to right, var(--black) 0%, transparent 40%),
+                linear-gradient(to top, var(--black) 0%, transparent 30%);
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 40px; left: 48px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--warm-gray);
+    writing-mode: vertical-rl;
+    display: flex; align-items: center; gap: 12px;
+    opacity: 0;
+    animation: fadeUp 1s 1s forwards;
+  }
+  .hero-scroll::before {
+    content: '';
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, transparent, var(--warm-gray));
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 48px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .stat {
+    padding: 0 32px;
+    border-right: 1px solid var(--border);
+  }
+  .stat:first-child { padding-left: 0; }
+  .stat:last-child { border-right: none; }
+  .stat-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 300;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--warm-gray);
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+
+  /* Section base */
+  section { padding: 120px 48px; }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+    margin-bottom: 80px;
+  }
+  .section-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+  }
+  .section-title em { font-style: italic; color: var(--accent); }
+
+  /* About */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .about-text p {
+    font-size: 14px;
+    line-height: 2.2;
+    color: rgba(245, 242, 237, 0.75);
+    margin-bottom: 24px;
+  }
+  .about-text p strong {
+    color: var(--off-white);
+    font-weight: 500;
+  }
+  .about-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .timeline-item:first-child { border-top: 1px solid var(--border); }
+  .timeline-year {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    padding-top: 3px;
+  }
+  .timeline-content h4 {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+  .timeline-content p {
+    font-size: 12px;
+    color: var(--warm-gray);
+    line-height: 1.8;
+  }
+
+  /* Services */
+  .services-bg { background: #0e0d0b; }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+  }
+  .service-card {
+    background: var(--black);
+    padding: 56px 40px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .service-card:hover::before { transform: scaleX(1); }
+  .service-card:hover { background: #0f0f0c; }
+
+  .service-icon {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.3em;
+    margin-bottom: 40px;
+    display: block;
+  }
+  .service-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+  .service-desc {
+    font-size: 12px;
+    line-height: 2;
+    color: var(--warm-gray);
+    margin-bottom: 32px;
+  }
+  .service-tags {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--warm-gray);
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    text-transform: uppercase;
+  }
+
+  /* Works */
+  .works-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    margin-bottom: 2px;
+  }
+  .work-item {
+    background: var(--black);
+    aspect-ratio: 16/9;
+    position: relative;
+    overflow: hidden;
+    cursor: none;
+  }
+  .work-item img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1), filter 0.4s;
+    filter: grayscale(30%) brightness(0.8);
+  }
+  .work-item:hover img {
+    transform: scale(1.04);
+    filter: grayscale(0%) brightness(0.9);
+  }
+  .work-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,10,8,0.9) 0%, transparent 60%);
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 28px;
+  }
+  .work-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .work-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+  }
+
+  /* SNS Results */
+  .results-section { background: #0e0d0b; }
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+  }
+  .result-card {
+    padding: 48px 40px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .result-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--accent), transparent);
+  }
+  .result-platform {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .result-numbers {
+    display: flex; align-items: baseline; gap: 8px;
+    margin-bottom: 12px;
+  }
+  .result-from {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    color: var(--warm-gray);
+    font-weight: 300;
+    text-decoration: line-through;
+    text-decoration-color: rgba(154,149,144,0.4);
+  }
+  .result-arrow { color: var(--warm-gray); font-size: 14px; }
+  .result-to {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--off-white);
+  }
+  .result-period {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--warm-gray);
+  }
+
+  /* Contact */
+  .contact-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .contact-lead {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 300;
+    line-height: 1.2;
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+  }
+  .contact-lead em { font-style: italic; color: var(--accent); }
+  .contact-sub {
+    font-size: 13px;
+    color: var(--warm-gray);
+    line-height: 2;
+    margin-bottom: 56px;
+  }
+  .contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 40px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.3s, color 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .contact-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--accent);
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .contact-btn:hover::before { transform: translateX(0); }
+  .contact-btn:hover { color: var(--black); }
+  .contact-btn span { position: relative; z-index: 1; }
+
+  /* Footer */
+  footer {
+    padding: 32px 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer p {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--warm-gray);
+    letter-spacing: 0.15em;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(1.08); }
+    to { opacity: 0.65; transform: scale(1); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1), transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    nav { padding: 24px; }
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 120px 24px 80px; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); padding: 32px 24px; gap: 24px; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); padding: 0 0 24px; }
+    section { padding: 80px 24px; }
+    .about-grid { grid-template-columns: 1fr; gap: 48px; }
+    .services-grid { grid-template-columns: 1fr; }
+    .works-grid { grid-template-columns: 1fr; }
+    .results-grid { grid-template-columns: 1fr; gap: 16px; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="#" class="nav-logo">H.Y — Portfolio</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#works">Works</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero" style="padding:0;">
+  <div class="hero-left">
+    <p class="hero-eyebrow">Creative Director / Business Strategist</p>
+    <h1 class="hero-name">
+      Hiroki<br>
+      <em>Yamashita</em>
+    </h1>
+    <p class="hero-desc">
+      クリエイティブの本質と、ビジネスの論理。<br>
+      両者を横断する視点で、ブランドの成長を<br>
+      戦略から実行まで一貫して支援する。
+    </p>
+  </div>
+  <div class="hero-right">
+    <img class="hero-image" src="https://framerusercontent.com/images/rhqqt7qsduzoTkZRjEgBuuKXuyc.jpg" alt="Hiroki Yamashita">
+    <div class="hero-image-overlay"></div>
+  </div>
+  <p class="hero-scroll">Scroll</p>
+</section>
+
+<!-- Stats -->
+<div class="stats-bar">
+  <div class="stat reveal">
+    <div class="stat-number">25億</div>
+    <div class="stat-label">D2C企業での<br>統括売上規模</div>
+  </div>
+  <div class="stat reveal reveal-delay-1">
+    <div class="stat-number">6.3万</div>
+    <div class="stat-label">YouTube<br>登録者数達成</div>
+  </div>
+  <div class="stat reveal reveal-delay-2">
+    <div class="stat-number">8年+</div>
+    <div class="stat-label">クリエイティブ×<br>ビジネス経験</div>
+  </div>
+  <div class="stat reveal reveal-delay-3">
+    <div class="stat-number">0円</div>
+    <div class="stat-label">広告費ゼロで<br>SNS成長を実現</div>
+  </div>
+</div>
+
+<!-- About -->
+<section id="about">
+  <div class="section-header reveal">
+    <span class="section-number">01</span>
+    <h2 class="section-title">Who I <em>Am</em></h2>
+  </div>
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <p>
+        高校卒業後、映画を志してアメリカへ単身留学。帰国後、<strong>世界的写真家レスリーキーの映像チーム</strong>に加わり、現場でクリエイティブの核を学ぶ。
+      </p>
+      <p>
+        その後、D2C企業の専属クリエイターとして参画。次第にビジネス全体を担うようになり、<strong>取締役副社長兼COOとして年商25億円規模のEC事業を統括。</strong>マーケティング、広告、カスタマージャーニー設計、組織構築まで一手に担った。
+      </p>
+      <p>
+        現在は、<strong>SNS戦略・EC運用・映像制作</strong>を組み合わせた独自のアプローチで、中小〜中堅企業のブランド成長を支援している。広告費ゼロでYouTube 2万→6.3万人、TikTok 100→1.8万人を達成した実績を持つ。
+      </p>
+    </div>
+    <div class="about-timeline reveal reveal-delay-1">
+      <div class="timeline-item">
+        <span class="timeline-year">2015</span>
+        <div class="timeline-content">
+          <h4>Santa Monica College 留学</h4>
+          <p>Film Studies・哲学・一般教養を学ぶ</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">2017</span>
+        <div class="timeline-content">
+          <h4>レスリーキー 映像チーム</h4>
+          <p>世界的写真家のもとで映像制作の現場を経験</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">2019</span>
+        <div class="timeline-content">
+          <h4>D2C企業 専属クリエイター → COO</h4>
+          <p>映像制作から経営へ。取締役副社長兼COOとして年商25億円のEC事業を統括</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">2024</span>
+        <div class="timeline-content">
+          <h4>独立 / SNSプロデュース・戦略支援</h4>
+          <p>YouTube・TikTok・Instagramの有機的成長を実現。現在は複数社の戦略支援に従事</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section id="services" class="services-bg" style="padding: 120px 0;">
+  <div style="padding: 0 48px;">
+    <div class="section-header reveal">
+      <span class="section-number">02</span>
+      <h2 class="section-title">What I <em>Do</em></h2>
+    </div>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <span class="service-icon">01 — Strategy</span>
+      <h3 class="service-title">SNS戦略・<br>運用プロデュース</h3>
+      <p class="service-desc">
+        アルゴリズムの潮流を読み、ブランドの資産になるSNSを構築。キャスティングネットワークを活用した起爆剤と、有機的成長の組み合わせで、費用対効果の高い成長を実現する。
+      </p>
+      <div class="service-tags">
+        <span class="tag">YouTube</span>
+        <span class="tag">Instagram</span>
+        <span class="tag">TikTok</span>
+        <span class="tag">戦略立案</span>
+        <span class="tag">KPI設計</span>
+      </div>
+    </div>
+    <div class="service-card reveal reveal-delay-1">
+      <span class="service-icon">02 — Commerce</span>
+      <h3 class="service-title">EC・D2C<br>グロース支援</h3>
+      <p class="service-desc">
+        年商25億円のEC事業を統括した経験をもとに、カスタマージャーニーの最適化からLTV向上まで。SNSからの流入設計とEC転換率改善を一気通貫で担う。
+      </p>
+      <div class="service-tags">
+        <span class="tag">EC運用</span>
+        <span class="tag">CV改善</span>
+        <span class="tag">LTV最大化</span>
+        <span class="tag">ROI設計</span>
+      </div>
+    </div>
+    <div class="service-card reveal reveal-delay-2">
+      <span class="service-icon">03 — Creative</span>
+      <h3 class="service-title">映像・コンテンツ<br>ディレクション</h3>
+      <p class="service-desc">
+        一過性の消費で終わらない、文脈を宿したコンテンツ制作。目的と予算に最適化したチームを構築し、納品後の活用フェーズまで一貫してコミットする。
+      </p>
+      <div class="service-tags">
+        <span class="tag">映像制作</span>
+        <span class="tag">企画構成</span>
+        <span class="tag">ブランディング</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SNS Results -->
+<section class="results-section" id="results">
+  <div class="section-header reveal">
+    <span class="section-number">03</span>
+    <h2 class="section-title">SNS <em>Results</em></h2>
+  </div>
+  <p style="font-size:12px; color: var(--warm-gray); font-family: 'DM Mono', monospace; letter-spacing: 0.15em; margin-bottom: 48px;" class="reveal">
+    ※ 広告・インフルエンサーコラボなし / 期間：1〜1.5年
+  </p>
+  <div class="results-grid">
+    <div class="result-card reveal">
+      <div class="result-platform">YouTube</div>
+      <div class="result-numbers">
+        <span class="result-from">2万</span>
+        <span class="result-arrow">→</span>
+        <span class="result-to">6.3万</span>
+      </div>
+      <div class="result-period">登録者数</div>
+    </div>
+    <div class="result-card reveal reveal-delay-1">
+      <div class="result-platform">TikTok</div>
+      <div class="result-numbers">
+        <span class="result-from">100</span>
+        <span class="result-arrow">→</span>
+        <span class="result-to">1.8万</span>
+      </div>
+      <div class="result-period">フォロワー数</div>
+    </div>
+    <div class="result-card reveal reveal-delay-2">
+      <div class="result-platform">Instagram</div>
+      <div class="result-numbers">
+        <span class="result-from">300</span>
+        <span class="result-arrow">→</span>
+        <span class="result-to">7,000</span>
+      </div>
+      <div class="result-period">フォロワー数</div>
+    </div>
+  </div>
+</section>
+
+<!-- Works -->
+<section id="works" style="padding: 120px 0;">
+  <div style="padding: 0 48px;">
+    <div class="section-header reveal">
+      <span class="section-number">04</span>
+      <h2 class="section-title">Selected <em>Works</em></h2>
+    </div>
+  </div>
+  <div class="works-grid">
+    <div class="work-item reveal">
+      <img src="https://i.ytimg.com/vi_webp/ok2qXSvzySM/sddefault.webp" alt="Work 1">
+      <div class="work-overlay">
+        <span class="work-label">映像制作</span>
+        <h3 class="work-title">Video Direction</h3>
+      </div>
+    </div>
+    <div class="work-item reveal reveal-delay-1">
+      <img src="https://i.ytimg.com/vi_webp/r7bcfLJgKOg/sddefault.webp" alt="Work 2">
+      <div class="work-overlay">
+        <span class="work-label">コンテンツ制作</span>
+        <h3 class="work-title">Content Production</h3>
+      </div>
+    </div>
+    <div class="work-item reveal reveal-delay-2">
+      <img src="https://i.ytimg.com/vi_webp/mi5xSMUc5oA/sddefault.webp" alt="Work 3">
+      <div class="work-overlay">
+        <span class="work-label">SNSプロデュース</span>
+        <h3 class="work-title">SNS Produce</h3>
+      </div>
+    </div>
+    <div class="work-item reveal reveal-delay-3">
+      <img src="https://i.ytimg.com/vi_webp/WMxqwPZWsAA/sddefault.webp" alt="Work 4">
+      <div class="work-overlay">
+        <span class="work-label">ブランディング</span>
+        <h3 class="work-title">Brand Strategy</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact">
+  <div class="contact-inner">
+    <h2 class="contact-lead reveal">
+      一緒に、<em>成果を</em><br>つくりましょう。
+    </h2>
+    <p class="contact-sub reveal reveal-delay-1">
+      SNS戦略・EC改善・映像制作など、<br>
+      お気軽にご相談ください。
+    </p>
+    <a href="mailto:contact@example.com" class="contact-btn reveal reveal-delay-2">
+      <span>お問い合わせ</span>
+      <span>→</span>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Hiroki Yamashita. All rights reserved.</p>
+  <p>山梨県 / JAPAN</p>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
